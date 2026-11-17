@@ -1,69 +1,85 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import { FiArrowRight, FiBookOpen, FiSearch } from 'react-icons/fi';
+
+import { db } from '@/lib/db';
 
 export default function Home() {
+  const categories = [...new Set(db.books.map((book) => book.category))];
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="page home">
+      <section className="home-intro">
+        <div className="home-copy">
+          <p className="eyebrow">Thư viện khoa CNTT · PTIT</p>
+          <h1>Tra cứu sách trong thư viện.</h1>
+          <p className="lede">
+            Tìm theo tên sách hoặc chuyên mục, xem số bản còn lại và gửi yêu cầu mượn khi đã đăng
+            nhập.
           </p>
+
+          <form className="home-search" action="/books" method="get">
+            <label htmlFor="home-book-search">Tìm sách</label>
+            <div className="home-search-row">
+              <div className="home-search-input">
+                <FiSearch aria-hidden="true" />
+                <input
+                  id="home-book-search"
+                  name="q"
+                  placeholder="Tên sách, ví dụ: SQL"
+                  type="search"
+                />
+              </div>
+              <button className="button primary" type="submit">
+                Tìm sách
+              </button>
+            </div>
+          </form>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <aside className="home-summary" aria-label="Tổng quan thư viện">
+          <div className="home-summary-item">
+            <strong>{db.books.length}</strong>
+            <span>đầu sách</span>
+          </div>
+          <div className="home-summary-item">
+            <strong>{categories.length}</strong>
+            <span>chuyên mục</span>
+          </div>
+          <p>Danh mục được cập nhật theo dữ liệu thư viện hiện tại.</p>
+        </aside>
+      </section>
+
+      <section className="home-catalog" aria-labelledby="home-catalog-title">
+        <div className="catalog-intro">
+          <div>
+            <p className="eyebrow">Duyệt theo chủ đề</p>
+            <h2 id="home-catalog-title">Chuyên mục sách</h2>
+          </div>
+          <Link className="text-link" href="/books">
+            Xem tất cả sách <FiArrowRight aria-hidden="true" />
+          </Link>
         </div>
-      </main>
+
+        <div className="category-list">
+          {categories.map((category, index) => {
+            const bookCount = db.books.filter((book) => book.category === category).length;
+
+            return (
+              <Link
+                className="category-row"
+                href={`/books?category=${encodeURIComponent(category)}`}
+                key={category}
+              >
+                <span className="category-index">0{index + 1}</span>
+                <FiBookOpen aria-hidden="true" className="category-icon" />
+                <strong>{category}</strong>
+                <span className="category-count">{bookCount} đầu sách</span>
+                <FiArrowRight aria-hidden="true" className="category-arrow" />
+              </Link>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
